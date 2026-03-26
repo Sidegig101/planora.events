@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora - Find Event Services</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --primary-glow: rgba(212, 175, 55, 0.4);
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+            --success: #10b981;     
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            background-image: radial-gradient(circle at top left, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+        }
+
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        /* Navbar */
+        nav {
+            background: rgba(7, 7, 9, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0; z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .brand h1 { font-size: 32px; color: var(--primary); font-weight: 800; font-style: italic; }
+        .nav-links { list-style: none; display: flex; gap: 30px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-light); font-size: 14px; font-weight: 500; transition: 0.3s; }
+        .nav-links a:hover { color: var(--primary); }
+        
+        .btn-vendor { color: var(--text-light); border: 1px solid rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 4px; text-decoration: none; transition: 0.3s; }
+        .btn-vendor:hover { background: rgba(255,255,255,0.05); }
+
+        /* Page Header & Filters */
+        .marketplace-header { padding: 60px 50px 30px; text-align: center; }
+        .marketplace-header h2 { font-size: 45px; margin-bottom: 10px; }
+        .marketplace-header p { color: var(--text-muted); font-size: 16px; margin-bottom: 40px; }
+
+        .filter-bar {
+            background: var(--card-glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 12px;
+            display: flex;
+            gap: 15px;
+            max-width: 1000px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px);
+            flex-wrap: wrap;
+        }
+
+        .filter-group { display: flex; flex-direction: column; flex: 1; min-width: 150px; text-align: left; }
+        .filter-group label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .filter-group select, .filter-group input { 
+            background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); 
+            color: white; padding: 10px; border-radius: 6px; outline: none; width: 100%;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .btn-search {
+            background: var(--primary); color: var(--bg-dark); border: none; padding: 0 30px; 
+            border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 20px;
+        }
+        .btn-search:hover { box-shadow: 0 0 15px var(--primary-glow); }
+
+        /* Vendor Grid */
+        .vendor-section { padding: 50px; max-width: 1300px; margin: 0 auto; }
+        
+        .vendor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .vendor-card {
+            background: var(--card-glass);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .vendor-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+        .vendor-img {
+            height: 200px;
+            background: linear-gradient(45deg, #111, #222);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.1);
+            font-size: 50px;
+        }
+
+        .verified-badge {
+            position: absolute; top: 15px; right: 15px;
+            background: rgba(16, 185, 129, 0.9); color: white;
+            padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        }
+
+        .vendor-info { padding: 25px; display: flex; flex-direction: column; flex: 1; }
+        
+        .vendor-category { color: var(--primary); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .vendor-name { font-size: 20px; font-family: 'Playfair Display', serif; margin-bottom: 10px; }
+        
+        .vendor-rating { color: #fbbf24; font-size: 13px; margin-bottom: 15px; display: flex; align-items: center; gap: 5px;}
+        .vendor-rating span { color: var(--text-muted); font-size: 12px; margin-left: 5px; }
+
+        .vendor-price { font-size: 14px; color: var(--text-light); margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;}
+        .vendor-price span { font-size: 18px; font-weight: 600; color: var(--primary); }
+
+        .btn-check {
+            background: transparent; border: 1px solid var(--primary); color: var(--primary);
+            padding: 12px; border-radius: 6px; width: 100%; font-weight: 600; cursor: pointer; transition: 0.3s;
+            margin-top: auto;
+        }
+
+        .btn-check:hover { background: rgba(212, 175, 55, 0.1); }
+        .btn-loading { border-color: var(--text-muted) !important; color: var(--text-muted) !important; }
+        .btn-success { background: rgba(16, 185, 129, 0.1) !important; border-color: var(--success) !important; color: var(--success) !important; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">
+            <a href="index.html" style="text-decoration: none;"><h1>Planora.</h1></a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#" style="color: var(--primary);">Find Services</a></li>
+            <li><a href="login.html" class="btn-vendor">Customer Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="marketplace-header">
+        <h2>Discover The Finest Professionals</h2>
+        <p>Search verified independent vendors. Check live availability and book instantly.</p>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Service Category</label>
+                <select id="searchCategory">
+                    <option value="Photography">Photography</option>
+                    <option value="Catering">Catering</option>
+                    <option value="Venues">Venues</option>
+                    <option value="Decoration">Decoration</option>
+                    <option value="Transport">Transport</option>
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Mehendi">Mehendi</option>
+                    <option value="Makeup">Makeup</option>
+                    <option value="Priest">Priest</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Event Date (Muhurat)</label>
+                <input type="date" id="searchDate">
+            </div>
+            <div class="filter-group">
+                <label>Location</label>
+                <select id="searchLocation">
+                    <option value="Panvel">Panvel</option>
+                    <option value="Navi Mumbai">Navi Mumbai</option>
+                    <option value="Thane">Thane</option>
+                </select>
+            </div>
+            <button class="btn-search" id="mainSearchBtn" onclick="performLiveSearch()"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        </div>
+    </div>
+
+    <section class="vendor-section">
+        <h3 id="dynamicResultsHeading" style="margin-bottom: 20px; font-size: 22px; transition: 0.3s;">Featured Professionals</h3>
+        
+        <div class="vendor-grid" id="vendorGridContainer">
+            <div class="vendor-card">
+                <div class="vendor-img"><i class="fa-solid fa-brush"></i><div class="verified-badge"><i class="fa-solid fa-shield-check"></i> Verified</div></div>
+                <div class="vendor-info">
+                    <div class="vendor-category">Makeup • Panvel</div>
+                    <div class="vendor-name">Shital Makeover Studio & Academy</div>
+                    <div class="vendor-rating"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i><span>(48 Reviews)</span></div>
+                    <div class="vendor-price">Starting from <br><span>₹18,000</span> / event</div>
+                    <button class="btn-check" onclick="checkAvailability(this)"><i class="fa-regular fa-calendar"></i> 1-Click Availability</button>
+                </div>
+            </div>
+
+            <div class="vendor-card">
+                <div class="vendor-img"><i class="fa-solid fa-camera"></i><div class="verified-badge"><i class="fa-solid fa-shield-check"></i> Verified</div></div>
+                <div class="vendor-info">
+                    <div class="vendor-category">Photography • Navi Mumbai</div>
+                    <div class="vendor-name">Ekvira Film Photography</div>
+                    <div class="vendor-rating"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><span>(112 Reviews)</span></div>
+                    <div class="vendor-price">Starting from <br><span>₹35,000</span> / day</div>
+                    <button class="btn-check" onclick="checkAvailability(this)"><i class="fa-regular fa-calendar"></i> 1-Click Availability</button>
+                </div>
+            </div>
+
+            <div class="vendor-card">
+                <div class="vendor-img"><i class="fa-solid fa-utensils"></i><div class="verified-badge"><i class="fa-solid fa-shield-check"></i> Verified</div></div>
+                <div class="vendor-info">
+                    <div class="vendor-category">Catering • Thane</div>
+                    <div class="vendor-name">Bajrang Caterers & Services</div>
+                    <div class="vendor-rating"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i><span>(89 Reviews)</span></div>
+                    <div class="vendor-price">Starting from <br><span>₹850</span> / plate</div>
+                    <button class="btn-check" onclick="checkAvailability(this)"><i class="fa-regular fa-calendar"></i> 1-Click Availability</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const vendorDatabase = {
+            "Photography": [
+                { name: "Ekvira Film Photography", icon: "fa-camera", price: "₹35,000 / day" },
+                { name: "Kesar Photography Studio", icon: "fa-camera-retro", price: "₹45,000 / day" },
+                { name: "Aryangraphy Studios", icon: "fa-video", price: "₹60,000 / day" }
+            ],
+            "Catering": [
+                { name: "Bajrang Caterers & Services", icon: "fa-utensils", price: "₹850 / plate" },
+                { name: "Swaad - The Catering People", icon: "fa-bowl-food", price: "₹1,100 / plate" },
+                { name: "VSS and Sharma Caterers", icon: "fa-bell-concierge", price: "₹1,500 / plate" }
+            ],
+            "Makeup": [
+                { name: "Shital Makeover Studio & Academy", icon: "fa-brush", price: "₹18,000 / event" },
+                { name: "V Shine Family Salon", icon: "fa-eye", price: "₹12,000 / event" },
+                { name: "ISH Professional Bridal Make-up", icon: "fa-wand-magic-sparkles", price: "₹25,000 / event" }
+            ],
+            "Venues": [
+                { name: "Virupaksh Banquets Panvel", icon: "fa-archway", price: "₹2,50,000 / day" },
+                { name: "Aayush Resort & Lawns", icon: "fa-tree-city", price: "₹1,75,000 / day" },
+                { name: "Sayaji Effotel Hotel", icon: "fa-building", price: "₹3,00,000 / day" }
+            ],
+            "Decoration": [
+                { name: "Pinnacle Events & Decorators", icon: "fa-fan", price: "₹80,000 / setup" },
+                { name: "Floral Truce Event Planners", icon: "fa-leaf", price: "₹45,000 / setup" },
+                { name: "Mhatre Mandap Decorators", icon: "fa-crown", price: "₹1,20,000 / setup" }
+            ],
+            "Transport": [
+                { name: "Navi Mumbai Luxury Rides", icon: "fa-car", price: "₹8,000 / day" },
+                { name: "Vintage Wedding Cars Thane", icon: "fa-car-rear", price: "₹15,000 / day" },
+                { name: "Panvel Guest Shuttle Fleet", icon: "fa-bus", price: "₹12,000 / bus" }
+            ],
+            "Entertainment": [
+                { name: "DJ Vivekk Events", icon: "fa-music", price: "₹25,000 / event" },
+                { name: "Swaradhi Events & Musical Group", icon: "fa-guitar", price: "₹40,000 / event" },
+                { name: "DJ Badshah Belapur", icon: "fa-compact-disc", price: "₹30,000 / event" }
+            ],
+            "Mehendi": [
+                { name: "Shagun Creation - Harsha Mehtas", icon: "fa-hand-sparkles", price: "₹5,000 / bridal" },
+                { name: "Traditional Henna Studio", icon: "fa-leaf", price: "₹7,500 / bridal" },
+                { name: "Celebrity Mehendi By Priya", icon: "fa-star", price: "₹15,000 / bridal" }
+            ],
+            "Priest": [
+                { name: "Pandit Sharma Ji (Panvel)", icon: "fa-om", price: "₹11,000 / event" },
+                { name: "Vedic Rituals Team", icon: "fa-book-quran", price: "₹21,000 / event" },
+                { name: "Acharya Dev (Navi Mumbai)", icon: "fa-hands-praying", price: "₹15,000 / event" }
+            ]
+        };
+
+        function performLiveSearch() {
+            const btn = document.getElementById('mainSearchBtn');
+            const category = document.getElementById('searchCategory').value;
+            const location = document.getElementById('searchLocation').value;
+            const dateInput = document.getElementById('searchDate').value;
+            const heading = document.getElementById('dynamicResultsHeading');
+            const grid = document.getElementById('vendorGridContainer');
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Searching...';
+            btn.style.opacity = '0.7';
+
+            setTimeout(() => {
+                let dateDisplay = "";
+                if (dateInput) {
+                    const dateObj = new Date(dateInput);
+                    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+                    dateDisplay = " for " + dateObj.toLocaleDateString('en-US', options);
+                }
+
+                heading.innerHTML = `Available ${category} in ${location}${dateDisplay}`;
+                heading.style.color = 'var(--primary)';
+
+                grid.innerHTML = '';
+
+                const results = vendorDatabase[category];
+
+                results.forEach((vendor, index) => {
+                    const randomReviews = Math.floor(Math.random() * 130) + 20;
+                    
+                    const cardHTML = `
+                        <div class="vendor-card" style="animation-delay: ${index * 0.1}s">
+                            <div class="vendor-img">
+                                <i class="fa-solid ${vendor.icon}"></i>
+                                <div class="verified-badge"><i class="fa-solid fa-shield-check"></i> Verified</div>
+                            </div>
+                            <div class="vendor-info">
+                                <div class="vendor-category">${category} • ${location}</div>
+                                <div class="vendor-name">${vendor.name}</div>
+                                <div class="vendor-rating">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                    <span>(${randomReviews} Reviews)</span>
+                                </div>
+                                <div class="vendor-price">Starting from <br><span>${vendor.price}</span></div>
+                                <button class="btn-check" onclick="checkAvailability(this)"><i class="fa-regular fa-calendar"></i> 1-Click Availability</button>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += cardHTML;
+                });
+
+                btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Search';
+                btn.style.opacity = '1';
+
+            }, 800); 
+        }
+
+        function checkAvailability(btn) {
+            if(btn.classList.contains('btn-loading') || btn.classList.contains('btn-success')) return;
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Syncing Live Calendar...';
+            btn.classList.add('btn-loading');
+
+            setTimeout(() => {
+                btn.classList.remove('btn-loading');
+                btn.classList.add('btn-success');
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Available - Request Quote';
+            }, 1500); 
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora Business - Vendor Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+            --success: #10b981;     
+            --warning: #f59e0b;     
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Setup */
+        .sidebar {
+            width: 260px;
+            background: rgba(0,0,0,0.6);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .sidebar-header h2 { color: var(--primary); font-family: 'Playfair Display', serif; font-size: 24px; font-style: italic;}
+        .business-badge { font-size: 10px; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 12px; color: var(--primary); margin-top: 5px; display: inline-block;}
+
+        .nav-menu { padding: 20px 0; flex: 1; }
+        .nav-item {
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.02); color: var(--text-light); }
+        .nav-item.active { background: rgba(212, 175, 55, 0.05); color: var(--primary); border-right: 3px solid var(--primary); }
+        .nav-item i { width: 20px; text-align: center; }
+
+        .sidebar-footer { padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-footer a { color: var(--text-muted); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.3s;}
+        .sidebar-footer a:hover { color: #ef4444; }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.03) 0%, transparent 50%);
+        }
+
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .greeting h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 5px;}
+        .greeting p { color: var(--text-muted); font-size: 14px; }
+        
+        .profile-btn { background: var(--card-glass); border: 1px solid rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 30px; display: flex; align-items: center; gap: 10px; font-size: 13px;}
+        .profile-btn .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+
+        /* KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+        .kpi-card { background: var(--card-glass); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 25px; display: flex; align-items: center; gap: 20px; transition: 0.3s;}
+        .kpi-card:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateY(-3px);}
+        
+        .kpi-icon { width: 50px; height: 50px; border-radius: 12px; background: rgba(212, 175, 55, 0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px;}
+        .kpi-details h3 { font-family: 'Poppins', sans-serif; font-size: 24px; font-weight: 700; margin-bottom: 2px;}
+        .kpi-details p { color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: 1px;}
+
+        /* Bottom Section: Chart and Leads */
+        .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        
+        .panel { background: var(--card-glass); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 25px; }
+        .panel h3 { font-size: 16px; margin-bottom: 20px; font-family: 'Poppins', sans-serif; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;}
+
+        /* Leads List */
+        .lead-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .lead-item:last-child { border-bottom: none; padding-bottom: 0;}
+        .lead-info h4 { font-size: 14px; font-weight: 500; margin-bottom: 3px;}
+        .lead-info p { font-size: 12px; color: var(--text-muted); }
+        .btn-accept { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: 600; cursor: pointer;}
+        .btn-accept:hover { background: var(--success); color: var(--bg-dark); }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Planora.</h2>
+            <div class="business-badge">Business Pro</div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i> Home Dashboard</a>
+            <a href="timeline.html" class="nav-item"><i class="fa-solid fa-chart-gantt"></i> Master Timeline</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-inbox"></i> Inquiries & Leads</a>
+            <a href="vendor-erp.html" class="nav-item"><i class="fa-solid fa-boxes-stacked"></i> Operations & ERP</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Smart Invoicing</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Store Settings</a>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="vendor-login.html"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="top-header">
+            <div class="greeting">
+                <h1>Welcome back, Rahul Studios</h1>
+                <p>Here is what's happening with your business today.</p>
+            </div>
+            <div class="profile-btn">
+                <div class="dot"></div> Accepting Leads
+            </div>
+        </div>
+
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="kpi-details">
+                    <h3>12</h3>
+                    <p>Upcoming Bookings</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i class="fa-solid fa-wallet"></i></div>
+                <div class="kpi-details">
+                    <h3>₹4.8L</h3>
+                    <p>YTD Revenue</p>
+                </div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);"><i class="fa-solid fa-bell"></i></div>
+                <div class="kpi-details">
+                    <h3>3</h3>
+                    <p>New Inquiries</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-grid">
+            <div class="panel">
+                <h3>Revenue Overview (Last 6 Months)</h3>
+                <div style="height: 300px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>New Lead Requests</h3>
+                
+                <div class="lead-item">
+                    <div class="lead-info">
+                        <h4>Aman & Priya's Wedding</h4>
+                        <p>Dec 18 • Grand Banquet, Panvel</p>
+                    </div>
+                    <button class="btn-accept">Send Quote</button>
+                </div>
+
+                <div class="lead-item">
+                    <div class="lead-info">
+                        <h4>TechCorp End of Year Party</h4>
+                        <p>Dec 22 • Vashi Expo Center</p>
+                    </div>
+                    <button class="btn-accept">Send Quote</button>
+                </div>
+
+                <div class="lead-item">
+                    <div class="lead-info">
+                        <h4>Sneha's 25th Birthday</h4>
+                        <p>Jan 05 • Seawoods Estate</p>
+                    </div>
+                    <button class="btn-accept">Send Quote</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        
+        // Gradient for the line fill
+        let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(212, 175, 55, 0.5)'); // Gold at the top
+        gradient.addColorStop(1, 'rgba(212, 175, 55, 0.0)'); // Transparent at the bottom
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                datasets: [{
+                    label: 'Revenue (INR)',
+                    data: [40000, 55000, 30000, 80000, 120000, 155000],
+                    borderColor: '#d4af37',
+                    backgroundColor: gradient,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#070709',
+                    pointBorderColor: '#d4af37',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    fill: true,
+                    tension: 0.4 // Gives it a smooth, modern curve
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#9ca3af', callback: function(value) { return '₹' + value / 1000 + 'k'; } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#9ca3af' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora Business - ERP & Operations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+            --success: #10b981;     
+            --warning: #f59e0b;     
+            --danger: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body { background-color: var(--bg-dark); color: var(--text-light); display: flex; height: 100vh; overflow: hidden; }
+
+        /* Sidebar - Matches Dashboard */
+        .sidebar { width: 260px; background: rgba(0,0,0,0.6); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
+        .sidebar-header { padding: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-header h2 { color: var(--primary); font-family: 'Playfair Display', serif; font-size: 24px; font-style: italic;}
+        .business-badge { font-size: 10px; border: 1px solid var(--primary); padding: 2px 8px; border-radius: 12px; color: var(--primary); margin-top: 5px; display: inline-block;}
+
+        .nav-menu { padding: 20px 0; flex: 1; }
+        .nav-item { padding: 15px 30px; display: flex; align-items: center; gap: 15px; color: var(--text-muted); text-decoration: none; transition: 0.3s; font-size: 14px; font-weight: 500; }
+        .nav-item:hover { background: rgba(255,255,255,0.02); color: var(--text-light); }
+        .nav-item.active { background: rgba(212, 175, 55, 0.05); color: var(--primary); border-right: 3px solid var(--primary); }
+        .nav-item i { width: 20px; text-align: center; }
+
+        .sidebar-footer { padding: 20px 30px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-footer a { color: var(--text-muted); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 10px; transition: 0.3s;}
+        .sidebar-footer a:hover { color: var(--danger); }
+
+        /* Main Content */
+        .main-content { flex: 1; padding: 40px 50px; overflow-y: auto; background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.03) 0%, transparent 50%); }
+        .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+        .greeting h1 { font-family: 'Playfair Display', serif; font-size: 32px; margin-bottom: 5px;}
+        .greeting p { color: var(--text-muted); font-size: 14px; }
+        
+        .erp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        
+        .panel { background: var(--card-glass); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 30px; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 20px;}
+        .panel h3 { font-size: 18px; font-family: 'Poppins', sans-serif; font-weight: 600; }
+
+        /* Inventory Bars */
+        .inventory-item { margin-bottom: 20px; }
+        .inv-details { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 500;}
+        .progress-bg { width: 100%; background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; }
+        .fill-warning { background: var(--warning); width: 85%; }
+        .fill-success { background: var(--success); width: 40%; }
+        .fill-danger { background: var(--danger); width: 95%; }
+
+        /* Staff Roster */
+        .staff-item { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.02); }
+        .staff-item:last-child { border-bottom: none; }
+        .staff-info { display: flex; align-items: center; gap: 15px; }
+        .staff-avatar { width: 40px; height: 40px; background: rgba(212, 175, 55, 0.1); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;}
+        .staff-name { font-size: 14px; font-weight: 600; }
+        .staff-role { font-size: 12px; color: var(--text-muted); }
+        
+        .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
+        .status-active { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .status-standby { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.2); }
+
+        .btn-dispatch { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-dispatch:hover { background: rgba(212, 175, 55, 0.1); }
+        
+        /* Interactive State */
+        .btn-loading { border-color: var(--warning) !important; color: var(--warning) !important; }
+        .btn-dispatched { background: rgba(16, 185, 129, 0.1) !important; border-color: var(--success) !important; color: var(--success) !important; }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Planora.</h2>
+            <div class="business-badge">Business Pro</div>
+        </div>
+        
+        <div class="nav-menu">
+            <a href="vendor-dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i> Home Dashboard</a>
+            <a href="timeline.html" class="nav-item"><i class="fa-solid fa-chart-gantt"></i> Master Timeline</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-inbox"></i> Inquiries & Leads</a>
+            <a href="#" class="nav-item active"><i class="fa-solid fa-boxes-stacked"></i> Operations & ERP</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-file-invoice-dollar"></i> Smart Invoicing</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> ERP Settings</a>
+        </div>
+
+        <div class="sidebar-footer">
+            <a href="vendor-login.html"><i class="fa-solid fa-arrow-right-from-bracket"></i> Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="top-header">
+            <div class="greeting">
+                <h1>Resource Management</h1>
+                <p>Track your physical inventory and staff logistics in real-time.</p>
+            </div>
+            <button class="btn-dispatch" style="background: var(--primary); color: var(--bg-dark);"><i class="fa-solid fa-download"></i> Export Logistics Report</button>
+        </div>
+
+        <div class="erp-grid">
+            
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Live Inventory Status</h3>
+                    <i class="fa-solid fa-warehouse" style="color: var(--text-muted);"></i>
+                </div>
+                
+                <div class="inventory-item">
+                    <div class="inv-details">
+                        <span>Premium Banquet Chairs</span>
+                        <span style="color: var(--warning);">850 / 1000 Deployed</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill fill-warning"></div></div>
+                </div>
+
+                <div class="inventory-item">
+                    <div class="inv-details">
+                        <span>Floral Decor Kits</span>
+                        <span style="color: var(--success);">4 / 10 Deployed</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill fill-success"></div></div>
+                </div>
+
+                <div class="inventory-item">
+                    <div class="inv-details">
+                        <span>DSLR Camera Rigs</span>
+                        <span style="color: var(--danger);">19 / 20 Deployed</span>
+                    </div>
+                    <div class="progress-bg"><div class="progress-fill fill-danger"></div></div>
+                </div>
+                
+                <div style="margin-top: 30px; font-size: 12px; color: var(--text-muted); background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <i class="fa-solid fa-triangle-exclamation" style="color: var(--danger);"></i> Low stock warning on DSLR Camera Rigs for Dec 15th weekend.
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>Crew Deployment</h3>
+                    <i class="fa-solid fa-users-gear" style="color: var(--text-muted);"></i>
+                </div>
+
+                <div class="staff-item">
+                    <div class="staff-info">
+                        <div class="staff-avatar">AM</div>
+                        <div>
+                            <div class="staff-name">Amit Mishra</div>
+                            <div class="staff-role">Lead Photographer</div>
+                        </div>
+                    </div>
+                    <div class="status-badge status-active">On Site: Rahul's Wedding</div>
+                </div>
+
+                <div class="staff-item">
+                    <div class="staff-info">
+                        <div class="staff-avatar">SK</div>
+                        <div>
+                            <div class="staff-name">Suresh Kumar</div>
+                            <div class="staff-role">Logistics Driver</div>
+                        </div>
+                    </div>
+                    <button class="btn-dispatch" id="dispatchBtn" onclick="dispatchCrew(this)"><i class="fa-solid fa-truck-fast"></i> Dispatch to Venue</button>
+                </div>
+
+                <div class="staff-item">
+                    <div class="staff-info">
+                        <div class="staff-avatar">PJ</div>
+                        <div>
+                            <div class="staff-name">Pooja Joshi</div>
+                            <div class="staff-role">Event Coordinator</div>
+                        </div>
+                    </div>
+                    <div class="status-badge status-standby">Standby (Available)</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Interactive Script for the Pitch Demo
+        function dispatchCrew(btn) {
+            if(btn.classList.contains('btn-loading') || btn.classList.contains('btn-dispatched')) return;
+
+            // Step 1: Loading state
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dispatching...';
+            btn.classList.add('btn-loading');
+
+            // Step 2: Success state after 1.5 seconds
+            setTimeout(() => {
+                btn.classList.remove('btn-loading');
+                btn.classList.add('btn-dispatched');
+                btn.innerHTML = '<i class="fa-solid fa-check-double"></i> En Route: Vashi Expo';
+                
+                // Change the appearance to look like a status badge instead of a button
+                btn.style.background = 'rgba(16, 185, 129, 0.1)';
+                btn.style.border = '1px solid var(--success)';
+                btn.style.color = 'var(--success)';
+                btn.style.cursor = 'default';
+            }, 1500); 
+        }
+    </script>
+</body>
+</html>

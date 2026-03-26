@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora - Consumer Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --primary-glow: rgba(212, 175, 55, 0.4);
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at center, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+            position: relative;
+        }
+
+        nav {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 30px 50px;
+        }
+
+        .brand h1 { font-size: 32px; color: var(--primary); font-weight: 800; font-style: italic; font-family: 'Playfair Display', serif; }
+
+        .auth-container {
+            background: var(--card-glass);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 50px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(212, 175, 55, 0.02);
+            backdrop-filter: blur(20px);
+            animation: slideUp 0.6s ease;
+        }
+
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h2 { font-size: 28px; font-family: 'Playfair Display', serif; margin-bottom: 5px; }
+        .auth-header p { color: var(--text-muted); font-size: 14px; }
+
+        .auth-toggle {
+            display: flex;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+
+        .toggle-btn.active {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-light);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+        .input-group input {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            padding: 14px 20px; border-radius: 8px; color: white; font-size: 14px; outline: none; transition: 0.3s;
+        }
+
+        .input-group input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); }
+
+        .forgot-password { display: block; text-align: right; font-size: 12px; color: var(--primary); text-decoration: none; margin-top: -10px; margin-bottom: 20px; }
+
+        .btn-submit {
+            width: 100%; background: var(--primary); color: var(--bg-dark); border: none;
+            padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 20px;
+        }
+
+        .btn-submit:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-2px); }
+
+        .divider { display: flex; align-items: center; text-align: center; color: var(--text-muted); font-size: 12px; margin-bottom: 20px; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .divider:not(:empty)::before { margin-right: .25em; }
+        .divider:not(:empty)::after { margin-left: .25em; }
+
+        .btn-social {
+            width: 100%; background: transparent; color: var(--text-light); border: 1px solid rgba(255,255,255,0.2);
+            padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+
+        .btn-social:hover { background: rgba(255,255,255,0.05); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .signup-field { display: none; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">
+            <a href="index.html" style="text-decoration: none;"><h1>Planora.</h1></a>
+        </div>
+    </nav>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <h2 id="authTitle">Welcome Back</h2>
+            <p id="authSubtitle">Log in to manage your Master Timeline</p>
+        </div>
+
+        <div class="auth-toggle">
+            <div class="toggle-btn active" id="btn-login" onclick="toggleAuth('login')">Log In</div>
+            <div class="toggle-btn" id="btn-signup" onclick="toggleAuth('signup')">Sign Up</div>
+        </div>
+
+        <form onsubmit="handleLogin(event)">
+            
+            <div class="input-group signup-field">
+                <label>Full Name</label>
+                <input type="text" id="signupName" placeholder="e.g. Rahul Sharma">
+            </div>
+
+            <div class="input-group signup-field">
+                <label>Mobile Number</label>
+                <input type="tel" id="signupMobile" placeholder="+91 98765 43210" pattern="[0-9+\s]+" title="Please enter a valid mobile number">
+            </div>
+
+            <div class="input-group">
+                <label id="loginLabel">Email or Mobile Number</label>
+                <input type="text" id="loginInput" placeholder="name@example.com or 9876543210" required>
+            </div>
+
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" placeholder="••••••••" required>
+            </div>
+
+            <a href="#" class="forgot-password" id="forgotLink">Forgot Password?</a>
+
+            <button type="submit" class="btn-submit" id="submitBtn">Log In</button>
+
+            <div class="divider">OR</div>
+
+            <button type="button" class="btn-social">
+                <i class="fa-brands fa-google" style="color: #ea4335;"></i> Continue with Google
+            </button>
+
+        </form>
+    </div>
+
+    <script>
+        function toggleAuth(type) {
+            const loginBtn = document.getElementById('btn-login');
+            const signupBtn = document.getElementById('btn-signup');
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const submitBtn = document.getElementById('submitBtn');
+            const forgotLink = document.getElementById('forgotLink');
+            const signupFields = document.querySelectorAll('.signup-field');
+            
+            const loginLabel = document.getElementById('loginLabel');
+            const loginInput = document.getElementById('loginInput');
+            
+            const signupName = document.getElementById('signupName');
+            const signupMobile = document.getElementById('signupMobile');
+
+            if (type === 'signup') {
+                loginBtn.classList.remove('active');
+                signupBtn.classList.add('active');
+                title.innerText = 'Create an Account';
+                subtitle.innerText = 'Start planning your event stress-free';
+                submitBtn.innerText = 'Create Account';
+                forgotLink.style.display = 'none';
+                
+                loginLabel.innerText = 'Email Address';
+                loginInput.type = 'email';
+                loginInput.placeholder = 'name@example.com';
+                
+                // Dynamically enforce requirement on signup fields
+                signupName.required = true;
+                signupMobile.required = true;
+                
+                signupFields.forEach(field => field.style.display = 'block');
+            } else {
+                signupBtn.classList.remove('active');
+                loginBtn.classList.add('active');
+                title.innerText = 'Welcome Back';
+                subtitle.innerText = 'Log in to manage your Master Timeline';
+                submitBtn.innerText = 'Log In';
+                forgotLink.style.display = 'block';
+                
+                loginLabel.innerText = 'Email or Mobile Number';
+                loginInput.type = 'text';
+                loginInput.placeholder = 'name@example.com or 9876543210';
+                
+                // Remove requirement when hidden so the form can still submit
+                signupName.required = false;
+                signupMobile.required = false;
+                
+                signupFields.forEach(field => field.style.display = 'none');
+            }
+        }
+
+       function handleLogin(event) {
+            event.preventDefault(); 
+            const btn = document.getElementById('submitBtn');
+            const isSignup = document.getElementById('btn-signup').classList.contains('active');
+            
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+            btn.style.opacity = '0.8';
+
+            setTimeout(() => {
+                // If they are signing up, send them to onboarding. If logging in, send them straight to services.
+                if (isSignup) {
+                    window.location.href = 'onboarding.html';
+                } else {
+                    window.location.href = 'services.html';
+                }
+            }, 1200);
+        }
+    </script>
+</body>
+</html>

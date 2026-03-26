@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora Dashboard - Master Timeline</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+            --success: #10b981;     
+            --warning: #f59e0b;     
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; 
+        }
+
+        /* App Navbar */
+        nav {
+            background: rgba(7, 7, 9, 1);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .brand h1 { font-size: 24px; color: var(--primary); font-weight: 800; font-style: italic; font-family: 'Playfair Display', serif; }
+        
+        .user-profile { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+        .avatar { width: 35px; height: 35px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--bg-dark); font-weight: bold; }
+
+        /* Timeline Dashboard Layout */
+        .dashboard-wrapper {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 65px);
+        }
+
+        /* Left Side: Client List */
+        .client-list {
+            width: 320px;
+            background: rgba(0,0,0,0.5);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .client-list-header { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-size: 12px; }
+
+        .client-tab { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; transition: 0.3s; }
+        .client-tab:hover { background: rgba(255,255,255,0.02); }
+        .client-tab.active { background: rgba(212, 175, 55, 0.05); border-left: 4px solid var(--primary); }
+
+        .client-name { font-weight: 600; font-size: 15px; color: var(--text-light); margin-bottom: 5px; }
+        .client-meta { font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; }
+        .event-type-badge { background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; font-size: 10px; }
+
+        /* Right Side: Timeline Display */
+        .timeline-display {
+            flex: 1;
+            padding: 40px 60px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(212, 175, 55, 0.03) 0%, transparent 60%);
+        }
+
+        .timeline-display-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .display-title h3 { font-size: 28px; color: var(--primary); margin-bottom: 5px; font-family: 'Playfair Display', serif;}
+        .display-title p { color: var(--text-muted); font-size: 14px; }
+        
+        .btn-outline { color: var(--success); border: 1px solid var(--success); padding: 8px 16px; border-radius: 4px; background: transparent; font-size: 13px; font-weight: 600;}
+
+        /* The Vertical Timeline */
+        .vertical-timeline { position: relative; padding-left: 30px; max-width: 900px; }
+        .vertical-timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: rgba(255,255,255,0.1); }
+
+        .timeline-item { position: relative; margin-bottom: 30px; animation: fadeIn 0.5s ease; }
+        .timeline-item::before { content: ''; position: absolute; left: -35px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg-dark); border: 2px solid var(--primary); }
+        .timeline-item.status-done::before { background: var(--success); border-color: var(--success); }
+        .timeline-item.status-pending::before { background: var(--warning); border-color: var(--warning); }
+
+        .timeline-time { font-weight: 700; color: var(--primary); font-size: 14px; margin-bottom: 5px; }
+        
+        .timeline-content { background: var(--card-glass); border: 1px solid rgba(255,255,255,0.05); padding: 20px 25px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
+        .timeline-content:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateX(5px); }
+        
+        .timeline-task { font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+        .timeline-vendor { font-size: 13px; color: var(--text-muted); }
+
+        .timeline-status { font-size: 11px; padding: 5px 12px; border-radius: 12px; font-weight: 600; }
+        .timeline-status.synced { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .timeline-status.transit { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid var(--warning); }
+        .timeline-status.pending { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255,255,255,0.2); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand">
+            <h1>Planora CRM.</h1>
+        </div>
+        <div class="user-profile">
+            <span><i class="fa-solid fa-bell"></i></span>
+            <div class="avatar">V</div>
+            <a href="vendor-login.html" style="color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: 0.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-light)'" title="Log Out">
+                <span>Vendor Workspace</span>
+                <i class="fa-solid fa-right-from-bracket" style="font-size: 14px; color: var(--text-muted);"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="dashboard-wrapper">
+        <div class="client-list">
+            <div class="client-list-header">Active Event Rosters</div>
+            
+            <div class="client-tab active" onclick="switchClient('client1')" id="tab-client1">
+                <div class="client-name">Anjali & Rahul</div>
+                <div class="client-meta">
+                    <span>Dec 12 • Grand Banquet</span>
+                    <span class="event-type-badge">Wedding</span>
+                </div>
+            </div>
+
+            <div class="client-tab" onclick="switchClient('client2')" id="tab-client2">
+                <div class="client-name">TechCorp Annual Gala</div>
+                <div class="client-meta">
+                    <span>Dec 15 • Vashi Expo</span>
+                    <span class="event-type-badge" style="background: rgba(79, 70, 229, 0.2); color: #818cf8;">Corporate</span>
+                </div>
+            </div>
+
+            <div class="client-tab" onclick="switchClient('client3')" id="tab-client3">
+                <div class="client-name">Aarav's 1st Birthday</div>
+                <div class="client-meta">
+                    <span>Dec 20 • Seawoods Club</span>
+                    <span class="event-type-badge" style="background: rgba(236, 72, 153, 0.2); color: #f472b6;">Party</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-display">
+            <div class="timeline-display-header">
+                <div class="display-title">
+                    <h3 id="display-name">Anjali & Rahul's Wedding</h3>
+                    <p id="display-meta"><i class="fa-solid fa-calendar-day"></i> Dec 12, 2026 &nbsp; | &nbsp; <i class="fa-solid fa-location-dot"></i> Grand Panvel Banquet</p>
+                </div>
+                <button class="btn-outline"><i class="fa-solid fa-check-double"></i> All Vendors Synced</button>
+            </div>
+
+            <div class="vertical-timeline" id="timeline-content">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        const timelineData = {
+            client1: {
+                title: "Anjali & Rahul's Wedding",
+                meta: "<i class='fa-solid fa-calendar-day'></i> Dec 12, 2026 &nbsp; | &nbsp; <i class='fa-solid fa-location-dot'></i> Grand Panvel Banquet",
+                events: [
+                    { time: "08:00 AM", task: "Bridal Makeup Setup", vendor: "Shital Makeover Studio", status: "Synced", statusClass: "synced", circleClass: "status-done" },
+                    { time: "10:30 AM", task: "Pre-wedding Shoot & Portraits", vendor: "Ekvira Film Photography", status: "Synced", statusClass: "synced", circleClass: "status-done" },
+                    { time: "12:00 PM", task: "Lunch Buffet Setup", vendor: "Bajrang Caterers", status: "In Transit", statusClass: "transit", circleClass: "status-pending" },
+                    { time: "05:00 PM", task: "Mandap & Floral Decor Finish", vendor: "Pinnacle Events & Decorators", status: "Pending", statusClass: "pending", circleClass: "" }
+                ]
+            },
+            client2: {
+                title: "TechCorp Annual Gala",
+                meta: "<i class='fa-solid fa-calendar-day'></i> Dec 15, 2026 &nbsp; | &nbsp; <i class='fa-solid fa-location-dot'></i> Vashi Expo Center",
+                events: [
+                    { time: "09:00 AM", task: "Stage & AV Equipment Setup", vendor: "SoundTech Solutions", status: "Synced", statusClass: "synced", circleClass: "status-done" },
+                    { time: "11:00 AM", task: "Branding & Banner Placements", vendor: "PrintPro Navi Mumbai", status: "Synced", statusClass: "synced", circleClass: "status-done" },
+                    { time: "06:00 PM", task: "Welcome Drinks & Appetizers", vendor: "Sayaji Effotel Hotel", status: "Pending", statusClass: "pending", circleClass: "" }
+                ]
+            },
+            client3: {
+                title: "Aarav's 1st Birthday",
+                meta: "<i class='fa-solid fa-calendar-day'></i> Dec 20, 2026 &nbsp; | &nbsp; <i class='fa-solid fa-location-dot'></i> Seawoods Club",
+                events: [
+                    { time: "03:00 PM", task: "Balloon Arch & Theme Setup", vendor: "KidsParty Co.", status: "Synced", statusClass: "synced", circleClass: "status-done" },
+                    { time: "04:30 PM", task: "Magic Show Performer Arrival", vendor: "Magician Zoya", status: "In Transit", statusClass: "transit", circleClass: "status-pending" },
+                    { time: "05:00 PM", task: "Custom Cake Delivery", vendor: "The Sweet Spot Bakery", status: "Pending", statusClass: "pending", circleClass: "" }
+                ]
+            }
+        };
+
+        function switchClient(clientId) {
+            document.querySelectorAll('.client-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById('tab-' + clientId).classList.add('active');
+
+            const data = timelineData[clientId];
+            document.getElementById('display-name').innerText = data.title;
+            document.getElementById('display-meta').innerHTML = data.meta;
+
+            const timelineContainer = document.getElementById('timeline-content');
+            timelineContainer.innerHTML = ''; 
+            
+            data.events.forEach(item => {
+                const html = `
+                    <div class="timeline-item ${item.circleClass}">
+                        <div class="timeline-time">${item.time}</div>
+                        <div class="timeline-content">
+                            <div>
+                                <div class="timeline-task">${item.task}</div>
+                                <div class="timeline-vendor"><i class="fa-solid fa-user-tie" style="margin-right: 5px;"></i> ${item.vendor}</div>
+                            </div>
+                            <div class="timeline-status ${item.statusClass}">${item.status}</div>
+                        </div>
+                    </div>
+                `;
+                timelineContainer.innerHTML += html;
+            });
+        }
+
+        window.onload = () => switchClient('client1');
+    </script>
+</body>
+</html>

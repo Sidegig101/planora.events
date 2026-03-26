@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planora - Event Setup</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #d4af37;        
+            --primary-glow: rgba(212, 175, 55, 0.4);
+            --bg-dark: #070709;     
+            --card-glass: rgba(255, 255, 255, 0.04); 
+            --text-light: #f8f8f8;
+            --text-muted: #9ca3af;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-image: radial-gradient(circle at top left, rgba(212, 175, 55, 0.08) 0%, transparent 60%);
+        }
+
+        nav {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .brand h1 { font-size: 32px; color: var(--primary); font-weight: 800; font-style: italic; font-family: 'Playfair Display', serif; }
+
+        .setup-container {
+            background: var(--card-glass);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 50px 60px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(212, 175, 55, 0.02);
+            backdrop-filter: blur(20px);
+            animation: slideUp 0.6s ease;
+        }
+
+        .setup-header { text-align: center; margin-bottom: 40px; }
+        .setup-header h2 { font-size: 32px; font-family: 'Playfair Display', serif; margin-bottom: 10px; color: var(--primary); }
+        .setup-header p { color: var(--text-muted); font-size: 15px; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group.full-width { grid-column: span 2; }
+        
+        .input-group label { display: block; font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 500;}
+        .input-group input, .input-group select {
+            width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 20px; border-radius: 8px; color: white; font-size: 15px; outline: none; transition: 0.3s;
+        }
+
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(212, 175, 55, 0.1); }
+        
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+        .btn-submit {
+            width: 100%; background: var(--primary); color: var(--bg-dark); border: none;
+            padding: 16px; border-radius: 8px; font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 20px;
+        }
+
+        .btn-submit:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-2px); }
+
+        /* Loading Overlay Styles */
+        .loading-overlay {
+            display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 7, 9, 0.95); border-radius: 16px; z-index: 10;
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.3);
+            border-top-color: var(--primary); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+
+        .loading-text { font-size: 18px; color: var(--primary); font-weight: 600; font-family: 'Playfair Display', serif; }
+        .loading-subtext { color: var(--text-muted); font-size: 13px; margin-top: 10px; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand"><h1>Planora.</h1></div>
+        <div style="color: var(--text-muted); font-size: 14px;"><i class="fa-solid fa-lock"></i> Secure Setup</div>
+    </nav>
+
+    <div class="setup-container">
+        <div id="setupContent">
+            <div class="setup-header">
+                <h2>Let's Setup Your Event</h2>
+                <p>Tell us the details so Planora can generate your custom dashboard.</p>
+            </div>
+
+            <form id="onboardingForm" onsubmit="handleSetup(event)">
+                
+                <div class="form-grid">
+                    <div class="input-group full-width">
+                        <label>Event Name</label>
+                        <input type="text" placeholder="e.g., Rahul & Anjali's Wedding" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Event Type</label>
+                        <select required>
+                            <option value="" disabled selected>Select Event Type</option>
+                            <option value="wedding">Traditional Wedding</option>
+                            <option value="intimate">Intimate Wedding</option>
+                            <option value="corporate">Corporate Event</option>
+                            <option value="party">Birthday / Private Party</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Event Date (Muhurat)</label>
+                        <input type="date" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Primary Location</label>
+                        <select required>
+                            <option value="" disabled selected>Select Location</option>
+                            <option value="panvel">Panvel</option>
+                            <option value="navi_mumbai">Navi Mumbai</option>
+                            <option value="thane">Thane</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Total Estimated Budget (INR)</label>
+                        <input type="number" placeholder="e.g. 1500000" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">Initialize My Dashboard <i class="fa-solid fa-arrow-right"></i></button>
+            </form>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <div class="loading-text" id="loadStatus">Creating Master Timeline...</div>
+            <div class="loading-subtext">Setting up secure environment</div>
+        </div>
+    </div>
+
+    <script>
+        function handleSetup(event) {
+            event.preventDefault(); 
+            
+            // Hide form, show loading overlay
+            document.getElementById('setupContent').style.opacity = '0.2';
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.style.display = 'flex';
+
+            const statusText = document.getElementById('loadStatus');
+
+            // Simulate the AI working in the background
+            setTimeout(() => {
+                statusText.innerText = "Optimizing AI Budget Allocator...";
+            }, 1200);
+
+            setTimeout(() => {
+                statusText.innerText = "Syncing Local Panvel Vendors...";
+            }, 2400);
+
+            // Redirect to the marketplace after "loading" is done
+            setTimeout(() => {
+                window.location.href = 'services.html'; 
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
